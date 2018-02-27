@@ -26,12 +26,6 @@ DHT dhts[4] = {dht0,dht1,dht2,dht3};
 
 
 
-//Variables
-float hum;  //Stores humidity value
-float temp; //Stores temperature value
-
-
-
 //Commands
 const int nOperations = 2;
 String operations[nOperations] = {"NOP","DHT"};
