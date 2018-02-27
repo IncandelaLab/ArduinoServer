@@ -9,13 +9,16 @@
 
 
 //Constants
-#define PARSEP ","
-#define DHTTYPE DHT22   // DHT 22  (AM2302)
+#define PARSEP ","  //  separator between parameters
+#define COMSEP ":"  //  separator between subcommands and between the commands and the parameters
 
-#define DHTPIN0 32    // pin of DHT22 number 0
-#define DHTPIN1 34    // pin of DHT22 number 1
-#define DHTPIN2 36    // pin of DHT22 number 2
-#define DHTPIN3 38    // pin of DHT22 number 3
+
+#define DHTTYPE DHT22   // DHT 22  (AM2302)
+#define DHTPIN0 32  //  pin of DHT22 number 0
+#define DHTPIN1 34  //  pin of DHT22 number 1
+#define DHTPIN2 36  //  pin of DHT22 number 2
+#define DHTPIN3 38  //  pin of DHT22 number 3
+#define NUMDHTS 4   //  number of DHTs attached
 
 DHT dht0(DHTPIN0, DHTTYPE); // Initialize DHT sensor number 0 for normal 16mhz Arduino
 DHT dht1(DHTPIN1, DHTTYPE); // 1
@@ -73,10 +76,10 @@ void flash(int port, int ms)
 void setup()
 {
   Serial.begin(9600);
-  dhts[0].begin();
-  dhts[1].begin();
-  //dhts[2].begin();
-  //dhts[3].begin();
+  for (int i=0; i<NUMDHTS; i++)
+  {
+    dhts[i].begin();
+  }
 }
 
 void cmd_dht(String parameters)
@@ -106,40 +109,33 @@ void cmd_dht(String parameters)
 
   if (id=="0"||id=="1"||id=="2"||id=="3")
   {
+    if (id.toInt() >= NUMDHTS)
+    {
+      Serial.println("There is no DHT22 with specified ID");
+      return;
+    }
     switch(channel_type)
     {
       case 0:
       temp = dhts[id.toInt()].readTemperature();
-      if (id == "0")
-      {
-        flash(33,10000);
-      }
       Serial.println(temp);
       break;
 
       case 1:
       hum = dhts[id.toInt()].readHumidity();
-      if (id == "0")
-      {
-        flash(35,100);
-      }
       Serial.println(hum);
       break;
 
       case 2:
       temp = dhts[id.toInt()].readTemperature();
       hum = dhts[id.toInt()].readHumidity();
-      if (id == "0")
-      {
-        flash(33,100);
-        flash(35,100);
-      }
       Serial.print(temp);
       Serial.print(",");
       Serial.println(hum);
       break;
 
       default:
+      Serial.println("ERROR: INVALID CHANNEL TYPE");
       break; 
     }
   }
@@ -153,8 +149,7 @@ void cmd_dht(String parameters)
 void router(String comm)
 {
   String bef,aft;
-  String sep = ":";
-  partition(comm,sep,bef,aft);
+  partition(comm,COMSEP,bef,aft);
 
   int op = indexOfOperation(bef);
   switch(op)
