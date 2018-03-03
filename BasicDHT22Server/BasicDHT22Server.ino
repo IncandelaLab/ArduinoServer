@@ -30,8 +30,8 @@ DHT dhts[4] = {dht0,dht1,dht2,dht3};
 
 
 //Commands
-const int nOperations = 2;
-String operations[nOperations] = {"NOP","DHT"};
+const int nOperations = 5;
+String operations[nOperations] = {"NOP","DHT","IDN","LIST","AVG"};
 int indexOfOperation(String op)
 {
   for (int i=0; i<nOperations; i++)
@@ -146,6 +146,31 @@ void cmd_dht(String parameters)
   }
 }
 
+void cmd_list()
+{
+  for (int i=0; i<NUMDHTS; i++)
+  {
+    float temp=dhts[i].readTemperature();
+    Serial.print(temp);
+    Serial.print(",");
+  } 
+  Serial.println("");
+}
+
+void cmd_avg()
+{ 
+  float totaltemp=0.0;
+  int num=0;
+  for (int i=0; i<NUMDHTS; i++)
+  {
+    float temp=dhts[i].readTemperature();
+    totaltemp=totaltemp+temp;
+    num=num+1;
+  }
+  float average=totaltemp/num;
+  Serial.println(average);
+}
+
 void router(String comm)
 {
   String bef,aft;
@@ -161,6 +186,19 @@ void router(String comm)
     case 1: // DHT
     cmd_dht(aft);
     break;
+
+    case 2: // IDN
+    Serial.println("Arduino Server");
+    break;
+
+    case 3: //LIST
+    cmd_list();
+    break;
+
+    case 4: //AVG
+    cmd_avg();
+    break;
+
 
     default:
     break;
